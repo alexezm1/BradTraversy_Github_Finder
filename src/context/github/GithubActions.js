@@ -17,6 +17,24 @@ export const searchUsers = async (text) => {
   return items;
 };
 
+export const getUserAndRepos = async (login) => {
+  const headers = { Authorization: `token ${GITHUB_TOKEN}` };
+  const params = new URLSearchParams({
+    sort: "updated",
+    per_page: "10",
+  });
+  const [user, repos] = await Promise.all([
+    fetch(`${GITHUB_URL}/users/${login}`, {
+      headers,
+    }).then((res) => res.json()),
+    fetch(`${GITHUB_URL}/users/${login}/repos?${params}`, {
+      headers,
+    }).then((res) => res.json()),
+  ]);
+
+  return { user, repos };
+};
+
 // Get Single User
 export const getUser = async (login) => {
   const response = await fetch(`${GITHUB_URL}/users/${login}`, {
