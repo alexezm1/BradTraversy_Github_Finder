@@ -5,17 +5,25 @@ import { useParams, Link } from "react-router-dom";
 import ReposList from "../components/repos/ReposList";
 import Spinner from "../components/layout/Spinner";
 import GithubContext from "../context/github/GithubContext";
+import { getUser, getUserRepos } from "../context/github/GithubActions";
 
 function User() {
-  const { user, getUser, loading, repos, getUserRepos } =
-    useContext(GithubContext);
+  const { user, loading, repos, dispatch } = useContext(GithubContext);
 
   const params = useParams();
 
   useEffect(() => {
-    getUser(params.login);
-    getUserRepos(params.login);
-  }, []);
+    dispatch({ type: "SET_LOADING" });
+    const getUserData = async () => {
+      const userData = await getUser(params.login);
+      dispatch({ type: "GET_USER", payload: userData });
+
+      const userRepos = await getUserRepos(params.login);
+      dispatch({ type: "GET_REPOS", payload: userRepos });
+    };
+
+    getUserData();
+  }, [dispatch, params.login]);
 
   const {
     name,
@@ -50,7 +58,7 @@ function User() {
           <div className="custom-card-image mb-6 md:mb-0">
             <div className="rounded-lg shadow-xl card image-full">
               <figure>
-                <img src={avatar_url} alt="Profile Picture" />
+                <img src={avatar_url} alt="Profile" />
               </figure>
               <div className="card-body py-4 gap-0 justify-end">
                 <h2 className="card-title mb-0">{name}</h2>
